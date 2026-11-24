@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sabu Studio | สบู่ก้อนทำมือ</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDF3F0;--ink:#1D3832;--lav:#7C6BC4;--lem:#E3A412;--card:#fff;--line:#C9D8D2}
+@media(prefers-color-scheme:dark){:root{--bg:#14241F;--ink:#E6F0EC;--card:#1D3430;--line:#35504A}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Prompt,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+main{max-width:960px;margin:auto;padding:24px 18px 60px}
+h1{font-size:clamp(2.2rem,7vw,4rem);line-height:1.15;margin:40px 0 12px;font-weight:700}
+.lead{max-width:34em;margin:0 0 36px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.p{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.ph{aspect-ratio:4/3;display:grid;place-items:center;font-size:4rem;position:relative}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lav .ph{background:#D9D2F2}.lem .ph{background:#F8E3A6}
+.p div.b{padding:16px 18px}
+.p h2{margin:0 0 4px;font-size:1.2rem}.price{font-weight:700;font-size:1.3rem}
+.lav .price{color:var(--lav)}.lem .price{color:#A8760A}
+h3{margin:48px 0 14px;font-size:1.5rem}
+form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:grid;gap:14px;max-width:560px}
+label{display:grid;gap:4px;font-weight:600;font-size:.95rem}
+input,select,textarea{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
+button{font:inherit;font-weight:600;padding:12px;border:0;border-radius:10px;background:var(--ink);color:var(--bg);cursor:pointer}
+button:disabled{opacity:.5}
+#total{font-weight:700}
+#msg{min-height:1.5em;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>สบู่ก้อนทำมือ<br>ล้างหน้าแล้วหอมนาน</h1>
+<p class="lead">ผลิตเป็นล็อตเล็ก ไม่ใส่น้ำหอมสังเคราะห์ ก้อนละ 100 กรัม ส่งทั่วไทยภายใน 1–3 วันทำการ</p>
+
+<section class="grid">
+<article class="p lav"><div class="ph"><span>🪻</span><img src="images/lavender.jpg" alt="สบู่ลาเวนเดอร์" onerror="this.remove()"></div>
+<div class="b"><h2>สบู่ลาเวนเดอร์</h2><p>รหัส SOAP-LAV-01 · ผิวนุ่ม กลิ่นผ่อนคลาย</p><div class="price">฿89</div></div></article>
+<article class="p lem"><div class="ph"><span>🍋</span><img src="images/lemon.jpg" alt="สบู่เลมอน" onerror="this.remove()"></div>
+<div class="b"><h2>สบู่เลมอน</h2><p>รหัส SOAP-LEM-01 · สดชื่น ลดความมัน</p><div class="price">฿79</div></div></article>
+</section>
+
+<h3>สั่งซื้อ</h3>
+<form id="f">
+<label>สินค้า
+<select id="sku" required>
+<option value="SOAP-LAV-01|สบู่ลาเวนเดอร์|89">สบู่ลาเวนเดอร์ – ฿89</option>
+<option value="SOAP-LEM-01|สบู่เลมอน|79">สบู่เลมอน – ฿79</option>
+</select></label>
+<label>จำนวน (ก้อน)<input id="qty" type="number" min="1" max="50" value="1" required></label>
+<label>ชื่อผู้รับ<input id="name" required autocomplete="name"></label>
+<label>เบอร์โทร<input id="phone" type="tel" pattern="0[0-9]{8,9}" placeholder="0812345678" required autocomplete="tel"></label>
+<label>ที่อยู่จัดส่ง (รวมรหัสไปรษณีย์)<textarea id="addr" rows="3" required autocomplete="street-address"></textarea></label>
+<div>ยอดรวม: <span id="total">฿89</span></div>
+<button id="btn">สั่งซื้อ</button>
+<div id="msg" role="status"></div>
+</form>
+</main>
+<script>
+// วาง URL ของ Apps Script (Web app) ตรงนี้
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyg8BaPTmY_vdzT_Kl5nUmsgns6QDVZ1SuJbuCEsEzhAhjfODbvf-2ZN7sTnPPHumwrog/exec";
+const $ = id => document.getElementById(id);
+function calc(){const p=+$("sku").value.split("|")[2];$("total").textContent="฿"+(p*(+$("qty").value||0)).toLocaleString()}
+$("sku").onchange=$("qty").oninput=calc;
+$("f").onsubmit=async e=>{
+  e.preventDefault();
+  const [sku,product,price]=$("sku").value.split("|");
+  const qty=+$("qty").value;
+  const data={sku,product,qty,price:+price,total:+price*qty,name:$("name").value.trim(),phone:$("phone").value.trim(),address:$("addr").value.trim()};
+  $("btn").disabled=true;$("msg").textContent="กำลังส่งคำสั่งซื้อ...";
+  try{
+    await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)});
+    $("msg").textContent="รับคำสั่งซื้อแล้ว ขอบคุณค่ะ";$("f").reset();calc();
+  }catch(err){$("msg").textContent="ส่งไม่สำเร็จ ลองใหม่อีกครั้ง"}
+  $("btn").disabled=false;
+};
+</script>
+</body>
+</html>
